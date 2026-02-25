@@ -1,6 +1,6 @@
 // M&A Radar Maroc — Dashboard React v2
 // Entièrement cliquable avec navigation, filtres, mémos et pipeline
-
+import RadarChatbot from './RadarChatbot'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
@@ -630,6 +630,7 @@ export default function App() {
         ::-webkit-scrollbar-track { background:transparent; }
         ::-webkit-scrollbar-thumb { background:${C.border}; border-radius:2px; }
       `}</style>
+            <RadarChatbot opportunites={opps} signaux={signaux} />
     </div>
   )
 }
