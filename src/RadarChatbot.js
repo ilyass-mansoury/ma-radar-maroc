@@ -73,10 +73,14 @@ Quand tu génères un email, propose plusieurs approches (directe, via réseau, 
 
 async function askClaude(messages, opportunites, signaux) {
   const systemPrompt = buildSystemPrompt(opportunites, signaux)
-  
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'x-api-key': 'COLLE-TA-CLÉ-ICI',
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1500,
