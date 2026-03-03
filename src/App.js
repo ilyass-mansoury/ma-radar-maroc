@@ -10,8 +10,8 @@ const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL || ''
 const SUPABASE_KEY = process.env.REACT_APP_SUPABASE_KEY || ''
 const sb = SUPABASE_URL && SUPABASE_KEY ? createClient(SUPABASE_URL, SUPABASE_KEY) : null
 
-// ─── REMPLACE PAR TA VRAIE CLÉ ANTHROPIC ─────────────────────────────────
-const ANTHROPIC_KEY = 'COLLE-TA-CLÉ-ICI'
+
+const GEMINI_KEY = 'AIzaSyBGAeGxhu7nFws4LYzRBuANLbXlL-gDS2c'
 // ─────────────────────────────────────────────────────────────────────────
 
 const C = {
@@ -94,11 +94,17 @@ THÈSE: PME et family businesses marocaines. Opérations: Pre-IPO, ouverture cap
 Réponds en français. Sois direct et actionnable comme un banquier d'affaires senior. Pour les mémos et emails, utilise un format professionnel.`
 }
 
-async function askClaude(messages,opps,sigs){
-  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,system:buildSystem(opps,sigs),messages:messages.filter(m=>!m.loading).slice(-10).map(m=>({role:m.role,content:m.content}))})})
-  if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'Erreur API')}
+async function askGemini(messages,opps,sigs){
+  const system=buildSystem(opps,sigs)
+  const contents=[
+    {role:'user',parts:[{text:system+'\n\nBien compris.'}]},
+    {role:'model',parts:[{text:'Compris, je suis prêt.'}]},
+    ...messages.filter(m=>!m.loading).slice(-8).map(m=>({role:m.role==='user'?'user':'model',parts:[{text:m.content}]}))
+  ]
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents,generationConfig:{maxOutputTokens:1500,temperature:0.7}})})
+  if(!res.ok){const e=await res.json();throw new Error(e.error?.message||`Erreur Gemini ${res.status}`)}
   const data=await res.json()
-  return data.content[0]?.text||''
+  return data.candidates?.[0]?.content?.parts?.[0]?.text||''
 }
 
 function ChatMsg({msg}){
@@ -129,7 +135,7 @@ function Chatbot({opps,sigs}){
     const userMsg={role:'user',content}
     setMsgs(prev=>[...prev,userMsg,{role:'assistant',content:'',loading:true}])
     setLoading(true)
-    try{const reply=await askClaude([...msgs,userMsg],opps,sigs);setMsgs(prev=>[...prev.filter(m=>!m.loading),{role:'assistant',content:reply}])}
+    try{const reply=await askGemini([...msgs,userMsg],opps,sigs);setMsgs(prev=>[...prev.filter(m=>!m.loading),{role:'assistant',content:reply}])}
     catch(e){setMsgs(prev=>[...prev.filter(m=>!m.loading),{role:'assistant',content:`❌ ${e.message}\n\nVérifie ta clé Anthropic — ligne 13 de App.js.`}])}
     setLoading(false)
   }
