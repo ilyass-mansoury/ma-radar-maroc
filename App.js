@@ -11,7 +11,7 @@ const SUPABASE_KEY = process.env.REACT_APP_SUPABASE_KEY || ''
 const sb = SUPABASE_URL && SUPABASE_KEY ? createClient(SUPABASE_URL, SUPABASE_KEY) : null
 
 
-const GEMINI_KEY = 'AIzaSyBo_yPXD082ztpFpshDjPJHm98hMroUG4w'
+const GEMINI_KEY = 'AIzaSyBGAeGxhu7nFws4LYzRBuANLbXlL-gDS2c'
 // ─────────────────────────────────────────────────────────────────────────
 
 const C = {
